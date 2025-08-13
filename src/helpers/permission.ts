@@ -8,6 +8,21 @@ export class PermissionError extends Error {
   }
 }
 
+export class StatusError extends Error {
+  constructor(message?: string) {
+    super(message);
+    this.name = 'StatusError';
+  }
+}
+
+// 無視しても良いエラー
+export class IgnorableError extends Error {
+  constructor(message?: string) {
+    super(message);
+    this.name = 'IgnorableError';
+  }
+}
+
 export function isAuthorAdmin(message: Message) {
   const permissions = message.member?.permissions;
   const isAdministrator = permissions?.has('Administrator');
@@ -20,19 +35,19 @@ export function isAuthorAdmin(message: Message) {
 
 export function isEnabledGuild(guild: GuildModel) {
   if (!guild) {
-    throw new Error('Guild not found');
+    throw new StatusError('Guild not found');
   }
   if (!guild.isEnabled) {
-    throw new Error('Bot is not enabled in this guild');
+    throw new IgnorableError('Bot is not enabled in this guild');
   }
-  return true;
 }
 
 export function isOnWatchChannel(guild: GuildModel, channelId: string) {
   if (!channelId) {
-    throw new Error('Channel ID is required');
+    throw new StatusError('Channel ID is required');
   }
+  console.log(guild.watchChannelId);
   if (guild.watchChannelId !== channelId) {
-    throw new Error('This channel is not allowed to create roles');
+    throw new IgnorableError('This channel is not allowed to create roles');
   }
 }

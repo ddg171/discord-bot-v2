@@ -6,6 +6,7 @@ import {
 } from '@/helpers/permission';
 import { getGuild } from '@/models/guilds';
 import getRoleModel from '@/models/roles';
+import { isValidRoleName } from '@/utils/validator';
 
 // ロールの作成
 export async function createRole(command: CommandArgObj): Promise<string> {
@@ -16,14 +17,19 @@ export async function createRole(command: CommandArgObj): Promise<string> {
   isOnWatchChannel(guild, command.message.channel.id);
 
   // ロール作成処理
-  // firestoreから名前でロールを検索
-  const roleName = command.args[1];
+  const roleName = command.args[1].trim();
+  isValidRoleName(roleName);
+
   // 作成済みロールの取得
   const existingRoles = await roleModel.listRoles();
-
   // 合計で10個までのロールを作成可能
   if (existingRoles.length >= 10) {
     throw new Error('ロールは最大10個まで作成可能です');
+  }
+
+  const duplicateRole = existingRoles.find((r) => r.name === roleName);
+  if (duplicateRole) {
+    throw new Error('duplicate role');
   }
 
   const discordGuild = await command.client.guilds.fetch(guild.id);

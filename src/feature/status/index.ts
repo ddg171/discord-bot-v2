@@ -1,6 +1,11 @@
 import { CommandArgObj } from '@/helpers/command';
-import { isAuthorAdmin } from '@/helpers/permission';
-import { createGuild, listGuilds, updateGuildIsEnable } from '@/models/guilds';
+import { isAuthorAdmin, isOnWatchChannel } from '@/helpers/permission';
+import {
+  createGuild,
+  getGuild,
+  listGuilds,
+  updateGuildIsEnable,
+} from '@/models/guilds';
 import { Client } from 'discord.js';
 
 // Bot の応答チャンネル指定機能
@@ -24,11 +29,10 @@ export async function stopWatching(command: CommandArgObj): Promise<string> {
 }
 
 // Bot の死活確認用応答機能
-export function sendStatus(): Promise<string> {
-  return new Promise((resolve) => {
-    // Bot の死活確認用応答処理
-    resolve('ポリポリ');
-  });
+export async function sendStatus(command: CommandArgObj): Promise<string> {
+  const guild = await getGuild(command.message.guild.id);
+  isOnWatchChannel(guild, command.message.channel.id);
+  return 'ポリポリ';
 }
 
 // Bot 起動時の通知機能
