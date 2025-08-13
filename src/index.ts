@@ -1,6 +1,7 @@
 // Require the necessary discord.js classes
 import { Client, Events, GatewayIntentBits, Message } from 'discord.js';
 import { config } from 'dotenv';
+import { notifyBotReady } from './feature/status';
 import { isBotMentioned, parseCommand, TooBusyError } from './helpers/command';
 import { PermissionError } from './helpers/permission';
 import { routes } from './routes';
@@ -56,6 +57,9 @@ async function handleMessage(message: Message) {
 
 client.once(Events.ClientReady, async (readyClient) => {
   console.log(`Ready! Logged in as ${readyClient.user.tag}/debug:${isDebug}`);
+  if (!isDebug) {
+    await notifyBotReady(readyClient);
+  }
 });
 
 // メッセージを受信したときのイベントリスナー

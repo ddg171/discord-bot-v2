@@ -1,6 +1,6 @@
 import { isAuthorAdmin, PermissionError } from '@/helpers/permission';
-import { createGuild } from '@/models/guilds';
-import { Message } from 'discord.js';
+import { createGuild, listGuilds, updateGuildIsEnable } from '@/models/guilds';
+import { Client, Message } from 'discord.js';
 
 // Bot の応答チャンネル指定機能
 export async function setupBot(message: Message): Promise<string> {
@@ -14,12 +14,13 @@ export async function setupBot(message: Message): Promise<string> {
 }
 
 // Bot 機能の有効化、無効化機能
-export function startWatching(): Promise<string> {}
-export function stopWatching(): Promise<string> {
-  return new Promise((resolve) => {
-    // Bot 機能の無効化処理
-    resolve('Bot stopped watching');
-  });
+export async function startWatching(message: Message): Promise<string> {
+  await updateGuildIsEnable(message.guild.id, true);
+  return 'Bot started watching';
+}
+export async function stopWatching(message: Message): Promise<string> {
+  await updateGuildIsEnable(message.guild.id, false);
+  return 'Bot stopped watching';
 }
 
 // Bot の死活確認用応答機能
@@ -31,9 +32,23 @@ export function sendStatus(): Promise<string> {
 }
 
 // Bot 起動時の通知機能
-export function notifyBotReady(): Promise<string> {
-  return new Promise((resolve) => {
-    // Bot 起動時の通知処理
-    resolve('Bot is ready');
+export async function notifyBotReady(
+  client: Client
+): Promise<PromiseSettledResult<void>[]> {
+  const guilds = await listGuilds();
+  const notifyTasks = guilds.map(async (guild) => {
+    if (!guild.isEnabled) {
+      return;
+    }
+    const discordGuild = await client.guilds.fetch(guild.id);
+    if (!discordGuild) {
+      console.error(`Guild not found: ${guild.id}`);
+      return;
+    }
+    const channel = await discordGuild.channels.fetch(guild.watchChannelId);
+    if (channel && channel.isTextBased()) {
+      channel.send('ﾑｸﾘ');
+    }
   });
+  return Promise.allSettled(notifyTasks);
 }

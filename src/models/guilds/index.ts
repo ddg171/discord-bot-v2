@@ -44,6 +44,18 @@ export async function getGuild(guildId: string): Promise<GuildModel | null> {
   return { id: doc.id, ...doc.data() } as GuildModel;
 }
 
+export async function listGuilds(): Promise<GuildModel[]> {
+  const snapshot = firestore
+    .collection(collectionName)
+    .orderBy('lastRequestedAt', 'desc')
+    .limit(10);
+  const docs = await snapshot.get();
+  return docs.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  })) as GuildModel[];
+}
+
 async function _updateGuild(
   guildId: string,
   data: Partial<GuildModel<Date>>
