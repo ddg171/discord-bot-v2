@@ -1,18 +1,61 @@
 // Require the necessary discord.js classes
-import { Client, Events, GatewayIntentBits } from 'discord.js';
+import { Client, Events, GatewayIntentBits, Message } from 'discord.js';
 import { config } from 'dotenv';
-import { handleMessage } from './routes';
+import { isBotMentioned, parseCommand, TooBusyError } from './helpers/command';
+import { PermissionError } from './helpers/permission';
+import { routes } from './routes';
+import { isValidCommand, showErrorInfo, showMessageInfo } from './utils';
 const { Guilds, GuildMessages, MessageContent } = GatewayIntentBits;
 config();
 
 const token = process.env.DISCORD_TOKEN;
-console.log('Token:', token);
+const isDebug = process.env.DEBUG === 'true';
 
 // Create a new client instance
 const client = new Client({ intents: [Guilds, GuildMessages, MessageContent] });
 
-client.once(Events.ClientReady, (readyClient) => {
-  console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+async function handleMessage(message: Message) {
+  // botは無視
+  if (message.author.bot) return;
+  // 編集も無視
+  if (message.editedTimestamp) return;
+  // 自分自身が送信したメッセージも無視
+  if (message.author.id === client.user?.id) return;
+
+  if (isDebug) {
+    showMessageInfo(message);
+    console.log(message.author.id === client.user?.id);
+  }
+  try {
+    const isMentioned = isBotMentioned(message);
+    if (!isMentioned) {
+      return;
+    }
+
+    const commandObj = parseCommand(message);
+    if (!isValidCommand(routes, commandObj.command)) {
+      throw new Error('Invalid command');
+    }
+    const resultMessage = await routes[commandObj.command](message);
+    message.reply(resultMessage);
+  } catch (error) {
+    if (isDebug) {
+      showErrorInfo(error);
+    }
+    if (error instanceof TooBusyError) {
+      message.reply('今忙しい');
+      return;
+    }
+    if (error instanceof PermissionError) {
+      message.reply('その資格はない');
+      return;
+    }
+    message.reply('何が言いたいのかわからん');
+  }
+}
+
+client.once(Events.ClientReady, async (readyClient) => {
+  console.log(`Ready! Logged in as ${readyClient.user.tag}/debug:${isDebug}`);
 });
 
 // メッセージを受信したときのイベントリスナー

@@ -1,16 +1,23 @@
-import { Message } from 'discord.js';
+import {
+  assignRole,
+  createRole,
+  deleteRole,
+  listRoles,
+  listUsersWithRole,
+  removeRole,
+} from './feature/role';
+import { sendStatus, setupBot, startWatching } from './feature/status';
 
-export async function handleMessage(message: Message) {
-  console.log(`Received message: ${message.content}`);
-  console.log(`guild: ${message.guild}/${message.guild.id}`);
-  console.log(`author: ${message.author}/${message.author.id}`);
-  // メッセージを送信したユーザーの権限
-  const permissions = message.member?.permissions;
-  const isAdministrator = permissions?.has('Administrator');
-  console.log(`isAdministrator: ${isAdministrator}`);
-  // ユーザーのロール一覧
-  const roles = message.member?.roles;
-  roles?.cache.forEach((role) => {
-    console.log(`role: ${role.name}/${role.id}`);
-  });
-}
+export const routes = {
+  setup: setupBot,
+  watch: startWatching,
+  poripori: sendStatus,
+  role: {
+    create: createRole,
+    delete: deleteRole,
+    list: listRoles,
+    user: listUsersWithRole,
+    as: assignRole,
+    remove: removeRole,
+  },
+};
