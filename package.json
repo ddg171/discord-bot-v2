@@ -10,5 +10,11 @@
   "license": "ISC",
   "dependencies": {
     "discord.js": "^14.21.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.1.4"
+  },
+  "volta": {
+    "node": "22.18.0"
   }
 }
