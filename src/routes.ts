@@ -6,11 +6,17 @@ import {
   listUsersWithRole,
   removeRole,
 } from './feature/role';
-import { sendStatus, setupBot, startWatching } from './feature/status';
+import {
+  sendStatus,
+  setupBot,
+  startWatching,
+  stopWatching,
+} from './feature/status';
 
 export const routes = {
   setup: setupBot,
   watch: startWatching,
+  stop: stopWatching,
   poripori: sendStatus,
   role: {
     create: createRole,

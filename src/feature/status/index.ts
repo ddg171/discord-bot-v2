@@ -10,24 +10,24 @@ export async function setupBot(message: Message): Promise<string> {
     throw new PermissionError();
   }
   await createGuild(guild, channel.id);
-  return 'Bot setup complete';
+  return 'ここをキャンプ地とする';
 }
 
 // Bot 機能の有効化、無効化機能
 export async function startWatching(message: Message): Promise<string> {
   await updateGuildIsEnable(message.guild.id, true);
-  return 'Bot started watching';
+  return '応答機能を有効化';
 }
 export async function stopWatching(message: Message): Promise<string> {
   await updateGuildIsEnable(message.guild.id, false);
-  return 'Bot stopped watching';
+  return '応答機能を無効化';
 }
 
 // Bot の死活確認用応答機能
 export function sendStatus(): Promise<string> {
   return new Promise((resolve) => {
     // Bot の死活確認用応答処理
-    resolve('poripori');
+    resolve('ポリポリ');
   });
 }
 
