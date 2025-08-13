@@ -1,9 +1,10 @@
 // Require the necessary discord.js classes
 import { Client, Events, GatewayIntentBits, Message } from 'discord.js';
 import { config } from 'dotenv';
+import { handleError } from './feature/error';
 import { notifyBotReady } from './feature/status';
-import { isBotMentioned, parseMessage, TooBusyError } from './helpers/command';
-import { PermissionError } from './helpers/permission';
+import { isBotMentioned, parseMessage } from './helpers/command';
+import { IgnorableError } from './helpers/permission';
 import { handleRoute, routes } from './routes';
 import { isValidCommand, showErrorInfo, showMessageInfo } from './utils';
 const { Guilds, GuildMessages, MessageContent } = GatewayIntentBits;
@@ -42,16 +43,12 @@ async function handleMessage(message: Message) {
   } catch (error) {
     if (isDebug) {
       showErrorInfo(error);
+      if (error instanceof IgnorableError) {
+        console.warn(`Ignorable error: ${error.message}`);
+      }
     }
-    if (error instanceof TooBusyError) {
-      message.reply('今忙しい');
-      return;
-    }
-    if (error instanceof PermissionError) {
-      message.reply('その資格はない');
-      return;
-    }
-    message.reply('何が言いたいのかわからん');
+
+    handleError(error, message);
   }
 }
 
