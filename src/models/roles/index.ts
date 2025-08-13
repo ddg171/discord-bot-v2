@@ -1,0 +1,66 @@
+import { Timestamp } from '@google-cloud/firestore';
+import firestore from '..';
+
+export type Role<T extends Date | Timestamp = Timestamp> = {
+  id: string;
+  name: string;
+  guildId: string;
+  createdAt: T;
+};
+
+class RoleModel {
+  guildId: string;
+  firestore: FirebaseFirestore.Firestore;
+  collectionRef: FirebaseFirestore.CollectionReference;
+
+  constructor(firestore: FirebaseFirestore.Firestore, guildId: string) {
+    this.firestore = firestore;
+    this.guildId = guildId;
+    this.collectionRef = this.firestore
+      .collection('guilds')
+      .doc(this.guildId)
+      .collection('roles');
+  }
+
+  async createRole(id: string, name: string): Promise<string> {
+    const roleRef = this.collectionRef.doc(id);
+    await roleRef.set({
+      id,
+      name,
+      guildId: this.guildId,
+      createdAt: new Date(),
+    });
+    return roleRef.id;
+  }
+
+  async deleteRole(roleId: string): Promise<void> {
+    await this.collectionRef.doc(roleId).delete();
+  }
+
+  async getRoleByName(name: string): Promise<Role | null> {
+    const snapshot = await this.collectionRef.where('name', '==', name).get();
+    if (snapshot.empty) {
+      return null;
+    }
+    const doc = snapshot.docs[0];
+    return {
+      id: doc.id,
+      ...doc.data(),
+    } as Role;
+  }
+
+  async listRoles(): Promise<Role[]> {
+    const snapshot = await this.collectionRef.get();
+    return snapshot.docs.map(
+      (doc) =>
+        ({
+          id: doc.id,
+          ...doc.data(),
+        } as Role)
+    );
+  }
+}
+
+export default function getRoleModel(guildId: string): RoleModel {
+  return new RoleModel(firestore, guildId);
+}

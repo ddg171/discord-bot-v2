@@ -2,9 +2,9 @@
 import { Client, Events, GatewayIntentBits, Message } from 'discord.js';
 import { config } from 'dotenv';
 import { notifyBotReady } from './feature/status';
-import { isBotMentioned, parseCommand, TooBusyError } from './helpers/command';
+import { isBotMentioned, parseMessage, TooBusyError } from './helpers/command';
 import { PermissionError } from './helpers/permission';
-import { routes } from './routes';
+import { handleRoute, routes } from './routes';
 import { isValidCommand, showErrorInfo, showMessageInfo } from './utils';
 const { Guilds, GuildMessages, MessageContent } = GatewayIntentBits;
 config();
@@ -33,11 +33,11 @@ async function handleMessage(message: Message) {
       return;
     }
 
-    const commandObj = parseCommand(message);
-    if (!isValidCommand(routes, commandObj.command)) {
+    const commandArgs = { ...parseMessage(message), client };
+    if (!isValidCommand(routes, commandArgs.command)) {
       throw new Error('Invalid command');
     }
-    const resultMessage = await routes[commandObj.command](message);
+    const resultMessage = await handleRoute(commandArgs)(commandArgs);
     message.reply(resultMessage);
   } catch (error) {
     if (isDebug) {

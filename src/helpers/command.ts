@@ -1,12 +1,13 @@
 import { getGuild } from '@/models/guilds';
-import { Message, User } from 'discord.js';
+import { Client, Message, User } from 'discord.js';
 
-export type ParsedCommand = {
+export type CommandArgObj = {
   Author: User;
   target?: User[];
   command: string;
   args: string[];
   message: Message;
+  client: Client;
 };
 
 export class TooBusyError extends Error {
@@ -16,7 +17,7 @@ export class TooBusyError extends Error {
   }
 }
 
-export function parseCommand(message: Message): ParsedCommand {
+export function parseMessage(message: Message): Omit<CommandArgObj, 'client'> {
   const author = message.author;
   const target = message.mentions?.users
     ? Array.from(message.mentions.users.values())

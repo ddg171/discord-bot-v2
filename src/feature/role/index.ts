@@ -1,17 +1,64 @@
+import { CommandArgObj } from '@/helpers/command';
+import {
+  isAuthorAdmin,
+  isEnabledGuild,
+  isOnWatchChannel,
+} from '@/helpers/permission';
+import { getGuild } from '@/models/guilds';
+import getRoleModel from '@/models/roles';
+
 // ロールの作成
-export function createRole(): Promise<string> {
-  return new Promise((resolve) => {
-    // ロール作成処理
-    resolve('Role created');
+export async function createRole(command: CommandArgObj): Promise<string> {
+  const guild = await getGuild(command.message.guild.id);
+  const roleModel = getRoleModel(guild.id);
+  isAuthorAdmin(command.message);
+  isEnabledGuild(guild);
+  isOnWatchChannel(guild, command.message.channel.id);
+
+  // ロール作成処理
+  // firestoreから名前でロールを検索
+  const roleName = command.args[1];
+  // 作成済みロールの取得
+  const existingRoles = await roleModel.listRoles();
+
+  // 合計で10個までのロールを作成可能
+  if (existingRoles.length >= 10) {
+    throw new Error('ロールは最大10個まで作成可能です');
+  }
+
+  const discordGuild = await command.client.guilds.fetch(guild.id);
+  const newRole = await discordGuild.roles.create({
+    name: roleName,
   });
+  await roleModel.createRole(newRole.id, roleName);
+
+  return `ロールを作成しました: ${roleName}`;
 }
 
 // ロールの削除
-export function deleteRole(): Promise<string> {
-  return new Promise((resolve) => {
-    // ロール削除処理
-    resolve('Role deleted');
-  });
+export async function deleteRole(command: CommandArgObj): Promise<string> {
+  const guild = await getGuild(command.message.guild.id);
+  const roleModel = getRoleModel(guild.id);
+  isAuthorAdmin(command.message);
+  isEnabledGuild(guild);
+  isOnWatchChannel(guild, command.message.channel.id);
+
+  // ロール削除処理
+  // firestoreから名前でロールを検索
+  const role = await roleModel.getRoleByName(command.args[1]);
+  if (!role) {
+    throw new Error(`Role not found: ${command.args[1]}`);
+  }
+  const roleId = role.id;
+  const discordGuild = await command.client.guilds.fetch(guild.id);
+  const discordRole = await discordGuild.roles.fetch(roleId);
+
+  if (discordRole) {
+    await discordRole.delete();
+  }
+  await roleModel.deleteRole(roleId);
+
+  return `ロールを削除しました: ${role.name}`;
 }
 
 // 作成済みロールの一覧表示

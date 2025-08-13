@@ -63,7 +63,7 @@ async function _updateGuild(
   await firestore
     .collection(collectionName)
     .doc(guildId)
-    .update({ data, updatedAt: new Date() });
+    .update({ ...data, updatedAt: new Date() });
 }
 
 export async function updateGuildLastRequestedAt(
@@ -86,3 +86,4 @@ export async function updateGuildIsEnable(
 ): Promise<void> {
   await _updateGuild(guildId, { isEnabled, updatedAt: new Date() });
 }
+export { firestore };

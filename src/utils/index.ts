@@ -26,3 +26,11 @@ export function showErrorInfo(error: Error) {
 export function isValidCommand(routes: {}, command: string): boolean {
   return Object.keys(routes).includes(command);
 }
+
+export function splitAndSanitizeString(input: string): string[] {
+  if (!input) return [];
+  return input
+    .split(',')
+    .map((item) => item.trim())
+    .filter((s) => s.length);
+}
