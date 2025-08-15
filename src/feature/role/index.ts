@@ -70,7 +70,7 @@ export async function deleteRole(command: CommandArgObj): Promise<string> {
   }
   await roleModel.deleteRole(roleId);
 
-  return `ロールを削除しました: ${role.name}`;
+  return `ロールを削除: ${role.name}`;
 }
 
 // 作成済みロールの一覧表示
