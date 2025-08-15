@@ -7,14 +7,17 @@ import { isBotMentioned, parseMessage } from './helpers/command';
 import { IgnorableError } from './helpers/permission';
 import { handleRoute, routes } from './routes';
 import { isValidCommand, showErrorInfo, showMessageInfo } from './utils';
-const { Guilds, GuildMessages, MessageContent } = GatewayIntentBits;
+const { Guilds, GuildMessages, MessageContent, GuildMembers } =
+  GatewayIntentBits;
 config();
 
 const token = process.env.DISCORD_TOKEN;
 const isDebug = process.env.DEBUG === 'true';
 
 // Create a new client instance
-const client = new Client({ intents: [Guilds, GuildMessages, MessageContent] });
+const client = new Client({
+  intents: [Guilds, GuildMessages, MessageContent, GuildMembers],
+});
 
 async function handleMessage(message: Message) {
   // botは無視

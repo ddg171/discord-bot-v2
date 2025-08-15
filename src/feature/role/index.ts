@@ -25,9 +25,10 @@ export async function createRole(command: CommandArgObj): Promise<string> {
 
   // 作成済みロールの取得
   const existingRoles = await roleModel.listRoles();
+  const roleLimitNumber = guild.roleLimitNumber;
   // 合計で10個までのロールを作成可能
-  if (existingRoles.length >= 10) {
-    return '10個以上は無理';
+  if (existingRoles.length >= roleLimitNumber) {
+    return `${roleLimitNumber}個以上は無理`;
   }
 
   const duplicateRole = existingRoles.find((r) => r.name === roleName);
@@ -108,15 +109,18 @@ export async function listUsersWithRole(
   if (!role) {
     return 'そのロールは知らない';
   }
-  const discordRole = await command.message.guild.roles.fetch(role.id);
+  const guildMembers = await command.message.guild.members.fetch();
 
-  const membersWithRole = discordRole.members;
+  const membersWithRole = guildMembers.filter((member) =>
+    member.roles.cache.has(role.id)
+  );
+
   if (!membersWithRole.size) {
     return 'そのロールを付与されているユーザーはいない';
   }
   const userList = membersWithRole
-    .map((member) => `- ${member.user.username}\n`)
-    .join(', ');
+    .map((member) => `- ${member.user.username}`)
+    .join('\n');
   return `ロールを付与されているユーザー:\n${userList}`;
 }
 

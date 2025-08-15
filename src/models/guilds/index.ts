@@ -9,6 +9,7 @@ export type GuildModel<T extends Date | Timestamp = Timestamp> = {
   name: string;
   ownerId: string;
   watchChannelId: string;
+  roleLimitNumber: number;
   isEnabled: boolean;
   createdAt: T;
   lastRequestedAt: T;
@@ -25,6 +26,7 @@ export async function createGuild(
     name: guild.name,
     ownerId: guild.ownerId,
     isEnabled: false,
+    roleLimitNumber: Number(process.env.ROLE_NUM_LIMIT) || 10,
     watchChannelId,
     createdAt: now,
     lastRequestedAt: now,
