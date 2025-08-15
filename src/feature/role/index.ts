@@ -41,7 +41,7 @@ export async function createRole(command: CommandArgObj): Promise<string> {
   });
   await roleModel.createRole(newRole.id, roleName);
 
-  return `ロールを作成しました: ${roleName}`;
+  return `ロールを作成: ${roleName}`;
 }
 
 // ロールの削除
@@ -59,7 +59,7 @@ export async function deleteRole(command: CommandArgObj): Promise<string> {
   }
   const role = await roleModel.getRoleByName(command.args[1]);
   if (!role) {
-    throw new ValidationError('そんなロールはない');
+    throw new ValidationError('そのロールは知らない');
   }
   const roleId = role.id;
   const discordGuild = await command.client.guilds.fetch(guild.id);
@@ -106,7 +106,7 @@ export async function listUsersWithRole(
   }
   const role = await roleModel.getRoleByName(command.args[1]);
   if (!role) {
-    return 'そんなロールはない';
+    return 'そのロールは知らない';
   }
   const discordRole = await command.message.guild.roles.fetch(role.id);
 
@@ -133,7 +133,7 @@ export async function assignRole(command: CommandArgObj): Promise<string> {
   }
   const role = await roleModel.getRoleByName(command.args[1]);
   if (!role) {
-    return 'そんなロールはない';
+    return 'そのロールは知らない';
   }
   const member = await command.message.guild.members.fetch(command.author.id);
   if (!member) {
@@ -156,7 +156,7 @@ export async function removeRole(command: CommandArgObj): Promise<string> {
   }
   const role = await roleModel.getRoleByName(command.args[1]);
   if (!role) {
-    return 'そんなロールはない';
+    return 'そのロールは知らない';
   }
   const member = await command.message.guild.members.fetch(command.author.id);
   if (!member) {
