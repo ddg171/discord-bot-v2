@@ -1,8 +1,7 @@
-import { CommandArgObj, isLimitReached } from '@/helpers/command';
-import { isAuthorAdmin, isOnWatchChannel } from '@/helpers/permission';
-import { guildModelClass } from '@/models';
-
 import { Client } from 'discord.js';
+import { CommandArgObj, isLimitReached } from '../../helpers/command';
+import { isAuthorAdmin, isOnWatchChannel } from '../../helpers/permission';
+import { guildModelClass } from '../../models';
 
 // Bot の応答チャンネル指定機能
 export async function setupBot(command: CommandArgObj): Promise<string> {

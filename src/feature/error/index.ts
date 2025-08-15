@@ -1,11 +1,11 @@
-import { TooBusyError } from '@/helpers/command';
+import { Message } from 'discord.js';
+import { TooBusyError } from '../../helpers/command';
 import {
   IgnorableError,
   PermissionError,
   StatusError,
-} from '@/helpers/permission';
-import { ValidationError } from '@/utils/validator';
-import { Message } from 'discord.js';
+} from '../../helpers/permission';
+import { ValidationError } from '../../utils/validator';
 
 export function handleError(error: Error, message: Message) {
   console.error('Error occurred:', error);
