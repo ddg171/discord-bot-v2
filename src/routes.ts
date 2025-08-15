@@ -29,7 +29,7 @@ export const routes: Routes = {
     delete: deleteRole,
     list: listRoles,
     user: listUsersWithRole,
-    as: assignRole,
+    add: assignRole,
     remove: removeRole,
   },
 };

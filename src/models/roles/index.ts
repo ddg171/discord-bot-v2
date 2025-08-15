@@ -38,6 +38,9 @@ class RoleModel {
   }
 
   async getRoleByName(name: string): Promise<Role | null> {
+    if (!name || typeof name !== 'string') {
+      return null;
+    }
     const snapshot = await this.collectionRef.where('name', '==', name).get();
     if (snapshot.empty) {
       return null;

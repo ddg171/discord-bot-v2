@@ -6,7 +6,7 @@ import {
 } from '@/helpers/permission';
 import { getGuild } from '@/models/guilds';
 import getRoleModel from '@/models/roles';
-import { isValidRoleName } from '@/utils/validator';
+import { isValidRoleName, ValidationError } from '@/utils/validator';
 
 // ロールの作成
 export async function createRole(command: CommandArgObj): Promise<string> {
@@ -17,6 +17,9 @@ export async function createRole(command: CommandArgObj): Promise<string> {
   isOnWatchChannel(guild, command.message.channel.id);
 
   // ロール作成処理
+  if (!command.args[1]) {
+    throw new ValidationError('ロール名がない');
+  }
   const roleName = command.args[1].trim();
   isValidRoleName(roleName);
 
@@ -51,9 +54,12 @@ export async function deleteRole(command: CommandArgObj): Promise<string> {
 
   // ロール削除処理
   // firestoreから名前でロールを検索
+  if (!command.args[1]) {
+    throw new ValidationError('ロール名がない');
+  }
   const role = await roleModel.getRoleByName(command.args[1]);
   if (!role) {
-    return 'そんなロールはない';
+    throw new ValidationError('そんなロールはない');
   }
   const roleId = role.id;
   const discordGuild = await command.client.guilds.fetch(guild.id);
@@ -86,25 +92,78 @@ export async function listRoles(command: CommandArgObj): Promise<string> {
 }
 
 // ロールを付与されているユーザーの一覧表示
-export function listUsersWithRole(): Promise<string> {
-  return new Promise((resolve) => {
-    // ロールを付与されているユーザーの一覧表示処理
-    resolve('List of users with role');
-  });
+export async function listUsersWithRole(
+  command: CommandArgObj
+): Promise<string> {
+  const guild = await getGuild(command.message.guild.id);
+  const roleModel = getRoleModel(guild.id);
+  isEnabledGuild(guild);
+  isOnWatchChannel(guild, command.message.channel.id);
+
+  // ロールを付与されているユーザーの一覧表示処理
+  if (!command.args[1]) {
+    throw new ValidationError('ロール名がない');
+  }
+  const role = await roleModel.getRoleByName(command.args[1]);
+  if (!role) {
+    return 'そんなロールはない';
+  }
+  const discordRole = await command.message.guild.roles.fetch(role.id);
+
+  const membersWithRole = discordRole.members;
+  if (!membersWithRole.size) {
+    return 'そのロールを付与されているユーザーはいない';
+  }
+  const userList = membersWithRole
+    .map((member) => `- ${member.user.username}\n`)
+    .join(', ');
+  return `ロールを付与されているユーザー:\n${userList}`;
 }
 
-// ロールの付与、取り消し
-export function assignRole(): Promise<string> {
-  return new Promise((resolve) => {
-    // ロールの付与処理
-    resolve('Role assigned');
-  });
+// ロールの付与
+export async function assignRole(command: CommandArgObj): Promise<string> {
+  const guild = await getGuild(command.message.guild.id);
+  const roleModel = getRoleModel(guild.id);
+  isEnabledGuild(guild);
+  isOnWatchChannel(guild, command.message.channel.id);
+
+  // ロール付与処理
+  if (!command.args[1]) {
+    return 'ロール名を指定してください';
+  }
+  const role = await roleModel.getRoleByName(command.args[1]);
+  if (!role) {
+    return 'そんなロールはない';
+  }
+  const member = await command.message.guild.members.fetch(command.author.id);
+  if (!member) {
+    return 'お前は誰だ';
+  }
+  await member.roles.add(role.id);
+  return `ロールを付与: ${role.name}`;
 }
-export function removeRole(): Promise<string> {
-  return new Promise((resolve) => {
-    // ロールの取り消し処理
-    resolve('Role removed');
-  });
+
+// ロールの取り消し
+export async function removeRole(command: CommandArgObj): Promise<string> {
+  const guild = await getGuild(command.message.guild.id);
+  const roleModel = getRoleModel(guild.id);
+  isEnabledGuild(guild);
+  isOnWatchChannel(guild, command.message.channel.id);
+
+  // ロール取り消し処理
+  if (!command.args[1]) {
+    return 'ロール名を指定してください';
+  }
+  const role = await roleModel.getRoleByName(command.args[1]);
+  if (!role) {
+    return 'そんなロールはない';
+  }
+  const member = await command.message.guild.members.fetch(command.author.id);
+  if (!member) {
+    return 'お前は誰だ';
+  }
+  await member.roles.remove(role.id);
+  return `ロールを削除: ${role.name}`;
 }
 
 // 使用されていないロールの自動削除機能

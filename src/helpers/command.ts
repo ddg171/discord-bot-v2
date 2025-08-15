@@ -2,7 +2,7 @@ import { getGuild } from '@/models/guilds';
 import { Client, Message, User } from 'discord.js';
 
 export type CommandArgObj = {
-  Author: User;
+  author: User;
   target?: User[];
   command: string;
   args: string[];
@@ -32,7 +32,7 @@ export function parseMessage(message: Message): Omit<CommandArgObj, 'client'> {
   // 全角スペースを半角スペースに変換
   const commandRaw = content.replace(/　/g, ' ');
   const [command, ...args] = commandRaw.split(' ');
-  return { Author: author, target, command, args, message };
+  return { author, target, command, args, message };
 }
 
 // リミット制限に達しているかどうかを確認する
