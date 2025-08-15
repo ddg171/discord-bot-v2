@@ -6,7 +6,15 @@
   "scripts": {
     "test": "vitest",
     "dev": "npx tsx watch src/index.ts",
-    "serve": "npx tsx src/index.ts"
+    "serve": "npx tsx src/index.ts",
+    "start": "pm2 start ecosystem.config.js",
+    "stop": "pm2 stop discord-bot-v2",
+    "restart": "pm2 restart discord-bot-v2",
+    "reload": "pm2 reload discord-bot-v2",
+    "delete": "pm2 delete discord-bot-v2",
+    "status": "pm2 status",
+    "logs": "pm2 logs discord-bot-v2  --lines 100",
+    "monit": "pm2 monit"
   },
   "author": "",
   "license": "ISC",
@@ -17,6 +25,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.1.4",
+    "pm2": "^6.0.8",
     "vitest": "^3.2.4"
   },
   "volta": {

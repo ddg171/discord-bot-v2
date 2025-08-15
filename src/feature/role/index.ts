@@ -1,12 +1,11 @@
-import { CommandArgObj, isLimitReached } from '@/helpers/command';
+import { CommandArgObj, isLimitReached } from '../../helpers/command';
 import {
   isAuthorAdmin,
   isEnabledGuild,
   isOnWatchChannel,
-} from '@/helpers/permission';
-import { getRoleModelClass, guildModelClass } from '@/models';
-
-import { isValidRoleName, ValidationError } from '@/utils/validator';
+} from '../../helpers/permission';
+import { getRoleModelClass, guildModelClass } from '../../models';
+import { ValidationError, isValidRoleName } from '../../utils/validator';
 
 // ロールの作成
 export async function createRole(command: CommandArgObj): Promise<string> {

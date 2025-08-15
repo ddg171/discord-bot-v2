@@ -1,5 +1,5 @@
-import { GuildModel } from '@/models/guilds';
 import { Message } from 'discord.js';
+import { GuildModel } from '../models/guilds';
 
 export class PermissionError extends Error {
   constructor(message?: string) {

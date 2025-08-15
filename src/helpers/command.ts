@@ -1,7 +1,7 @@
-import { guildModelClass } from '@/models';
-import { GuildModel } from '@/models/guilds';
-import { ValidationError } from '@/utils/validator';
 import { Client, Message, User } from 'discord.js';
+import { guildModelClass } from '../models';
+import { GuildModel } from '../models/guilds';
+import { ValidationError } from '../utils/validator';
 
 export type CommandArgObj = {
   author: User;
