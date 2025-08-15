@@ -1,3 +1,4 @@
+import { showHelp } from './feature/help';
 import {
   assignRole,
   createRole,
@@ -14,7 +15,9 @@ import {
 } from './feature/status';
 import { CommandArgObj } from './helpers/command';
 
-type RouteCallback = (command: CommandArgObj) => Promise<string>;
+type RouteCallback =
+  | ((command: CommandArgObj) => Promise<string>)
+  | (() => string);
 type Routes = {
   [key: string]: RouteCallback | { [key: string]: RouteCallback };
 };
@@ -24,6 +27,7 @@ export const routes: Routes = {
   watch: startWatching,
   stop: stopWatching,
   poripori: sendStatus,
+  help: showHelp,
   role: {
     create: createRole,
     delete: deleteRole,
