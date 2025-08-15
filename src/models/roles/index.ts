@@ -1,5 +1,4 @@
 import { Timestamp } from '@google-cloud/firestore';
-import firestore from '..';
 
 export type Role<T extends Date | Timestamp = Timestamp> = {
   id: string;
@@ -8,7 +7,7 @@ export type Role<T extends Date | Timestamp = Timestamp> = {
   createdAt: T;
 };
 
-class RoleModel {
+export default class RoleModelClass {
   guildId: string;
   firestore: FirebaseFirestore.Firestore;
   collectionRef: FirebaseFirestore.CollectionReference;
@@ -62,8 +61,4 @@ class RoleModel {
         } as Role)
     );
   }
-}
-
-export default function getRoleModel(guildId: string): RoleModel {
-  return new RoleModel(firestore, guildId);
 }

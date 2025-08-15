@@ -1,4 +1,6 @@
-import { getGuild } from '@/models/guilds';
+import { guildModelClass } from '@/models';
+import { GuildModel } from '@/models/guilds';
+import { ValidationError } from '@/utils/validator';
 import { Client, Message, User } from 'discord.js';
 
 export type CommandArgObj = {
@@ -27,31 +29,33 @@ export function parseMessage(message: Message): Omit<CommandArgObj, 'client'> {
     .replace(/<@!?(\d+)>/g, '')
     .trim();
   if (!content) {
-    throw new Error('No command content found');
+    throw new ValidationError();
   }
   // 全角スペースを半角スペースに変換
   const commandRaw = content.replace(/　/g, ' ');
   const [command, ...args] = commandRaw.split(' ');
-  return { author, target, command, args, message };
+  // 空白文字列の子要素を除外
+  const argsFiltered = args.filter((arg) => arg.trim() !== '');
+
+  return { author, target, command, args: argsFiltered, message };
 }
 
 // リミット制限に達しているかどうかを確認する
-export async function isLimitReached(
-  guildId: string,
-  limitSec: number = 3
-): Promise<boolean> {
+export function isLimitReached(guild: GuildModel, limitSec: number = 1) {
   const now = new Date().getTime();
-  const guild = await getGuild(guildId);
   if (!guild) {
-    return false; // ギルドが存在しない場合は制限に達していないとみなす
+    return; // ギルドが存在しない場合は制限に達していないとみなす
   }
   const lastRequestedAt = guild.lastRequestedAt.toDate().getTime();
-  return now - lastRequestedAt < limitSec * 1000;
+  const isTooBusy = now - lastRequestedAt < limitSec * 1000;
+  if (isTooBusy) {
+    throw new TooBusyError('リクエストが多すぎます');
+  }
 }
 
 // 応答機能が有効になっているかどうかを確認する
 export async function isResponseEnabled(guildId: string): Promise<boolean> {
-  const guild = await getGuild(guildId);
+  const guild = await guildModelClass.getGuild(guildId);
   const isEnabled = guild ? guild.isEnabled : false;
   return isEnabled;
 }

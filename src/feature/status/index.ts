@@ -1,11 +1,7 @@
-import { CommandArgObj } from '@/helpers/command';
+import { CommandArgObj, isLimitReached } from '@/helpers/command';
 import { isAuthorAdmin, isOnWatchChannel } from '@/helpers/permission';
-import {
-  createGuild,
-  getGuild,
-  listGuilds,
-  updateGuildIsEnable,
-} from '@/models/guilds';
+import { guildModelClass } from '@/models';
+
 import { Client } from 'discord.js';
 
 // Bot の応答チャンネル指定機能
@@ -14,27 +10,29 @@ export async function setupBot(command: CommandArgObj): Promise<string> {
 
   const guild = command.message.guild;
   const channel = command.message.channel;
-  await createGuild(guild, channel.id);
+  await guildModelClass.createGuild(guild, channel.id);
   return 'ここをキャンプ地とする';
 }
 
 // Bot 機能の有効化、無効化機能
 export async function startWatching(command: CommandArgObj): Promise<string> {
-  const guild = await getGuild(command.message.guild.id);
+  const guild = await guildModelClass.getGuild(command.message.guild.id);
   isOnWatchChannel(guild, command.message.channel.id);
-  await updateGuildIsEnable(command.message.guild.id, true);
+  isLimitReached(guild);
+  await guildModelClass.updateGuildIsEnable(command.message.guild.id, true);
   return '応答機能を有効化';
 }
 export async function stopWatching(command: CommandArgObj): Promise<string> {
-  const guild = await getGuild(command.message.guild.id);
+  const guild = await guildModelClass.getGuild(command.message.guild.id);
   isOnWatchChannel(guild, command.message.channel.id);
-  await updateGuildIsEnable(command.message.guild.id, false);
+  isLimitReached(guild);
+  await guildModelClass.updateGuildIsEnable(command.message.guild.id, false);
   return '応答機能を無効化';
 }
 
 // Bot の死活確認用応答機能
 export async function sendStatus(command: CommandArgObj): Promise<string> {
-  const guild = await getGuild(command.message.guild.id);
+  const guild = await guildModelClass.getGuild(command.message.guild.id);
   isOnWatchChannel(guild, command.message.channel.id);
   return 'ポリポリ';
 }
@@ -43,7 +41,7 @@ export async function sendStatus(command: CommandArgObj): Promise<string> {
 export async function notifyBotReady(
   client: Client
 ): Promise<PromiseSettledResult<void>[]> {
-  const guilds = await listGuilds();
+  const guilds = await guildModelClass.listGuilds();
   const notifyTasks = guilds.map(async (guild) => {
     if (!guild.isEnabled) {
       return;

@@ -1,20 +1,21 @@
-import { CommandArgObj } from '@/helpers/command';
+import { CommandArgObj, isLimitReached } from '@/helpers/command';
 import {
   isAuthorAdmin,
   isEnabledGuild,
   isOnWatchChannel,
 } from '@/helpers/permission';
-import { getGuild } from '@/models/guilds';
-import getRoleModel from '@/models/roles';
+import { getRoleModelClass, guildModelClass } from '@/models';
+
 import { isValidRoleName, ValidationError } from '@/utils/validator';
 
 // ロールの作成
 export async function createRole(command: CommandArgObj): Promise<string> {
-  const guild = await getGuild(command.message.guild.id);
-  const roleModel = getRoleModel(guild.id);
+  const guild = await guildModelClass.getGuild(command.message.guild.id);
+  const roleModel = getRoleModelClass(guild.id);
   isAuthorAdmin(command.message);
   isEnabledGuild(guild);
   isOnWatchChannel(guild, command.message.channel.id);
+  isLimitReached(guild);
 
   // ロール作成処理
   if (!command.args[1]) {
@@ -42,16 +43,20 @@ export async function createRole(command: CommandArgObj): Promise<string> {
   });
   await roleModel.createRole(newRole.id, roleName);
 
+  // 最終リクエスト時刻の更新
+  await guildModelClass.updateGuildLastRequestedAt(guild.id);
+
   return `ロールを作成: ${roleName}`;
 }
 
 // ロールの削除
 export async function deleteRole(command: CommandArgObj): Promise<string> {
-  const guild = await getGuild(command.message.guild.id);
-  const roleModel = getRoleModel(guild.id);
+  const guild = await guildModelClass.getGuild(command.message.guild.id);
+  const roleModel = getRoleModelClass(guild.id);
   isAuthorAdmin(command.message);
   isEnabledGuild(guild);
   isOnWatchChannel(guild, command.message.channel.id);
+  isLimitReached(guild);
 
   // ロール削除処理
   // firestoreから名前でロールを検索
@@ -70,17 +75,19 @@ export async function deleteRole(command: CommandArgObj): Promise<string> {
     await discordRole.delete();
   }
   await roleModel.deleteRole(roleId);
+  await guildModelClass.updateGuildLastRequestedAt(guild.id);
 
   return `ロールを削除: ${role.name}`;
 }
 
 // 作成済みロールの一覧表示
 export async function listRoles(command: CommandArgObj): Promise<string> {
-  const guild = await getGuild(command.message.guild.id);
-  const roleModel = getRoleModel(guild.id);
+  const guild = await guildModelClass.getGuild(command.message.guild.id);
+  const roleModel = getRoleModelClass(guild.id);
   isAuthorAdmin(command.message);
   isEnabledGuild(guild);
   isOnWatchChannel(guild, command.message.channel.id);
+  isLimitReached(guild);
 
   // ロール削除処理
   // firestoreから名前でロールを検索
@@ -96,10 +103,11 @@ export async function listRoles(command: CommandArgObj): Promise<string> {
 export async function listUsersWithRole(
   command: CommandArgObj
 ): Promise<string> {
-  const guild = await getGuild(command.message.guild.id);
-  const roleModel = getRoleModel(guild.id);
+  const guild = await guildModelClass.getGuild(command.message.guild.id);
+  const roleModel = getRoleModelClass(guild.id);
   isEnabledGuild(guild);
   isOnWatchChannel(guild, command.message.channel.id);
+  isLimitReached(guild);
 
   // ロールを付与されているユーザーの一覧表示処理
   if (!command.args[1]) {
@@ -126,10 +134,11 @@ export async function listUsersWithRole(
 
 // ロールの付与
 export async function assignRole(command: CommandArgObj): Promise<string> {
-  const guild = await getGuild(command.message.guild.id);
-  const roleModel = getRoleModel(guild.id);
+  const guild = await guildModelClass.getGuild(command.message.guild.id);
+  const roleModel = getRoleModelClass(guild.id);
   isEnabledGuild(guild);
   isOnWatchChannel(guild, command.message.channel.id);
+  isLimitReached(guild);
 
   // ロール付与処理
   if (!command.args[1]) {
@@ -144,15 +153,17 @@ export async function assignRole(command: CommandArgObj): Promise<string> {
     return 'お前は誰だ';
   }
   await member.roles.add(role.id);
+  await guildModelClass.updateGuildLastRequestedAt(guild.id);
   return `ロールを付与: ${role.name}`;
 }
 
 // ロールの取り消し
 export async function removeRole(command: CommandArgObj): Promise<string> {
-  const guild = await getGuild(command.message.guild.id);
-  const roleModel = getRoleModel(guild.id);
+  const guild = await guildModelClass.getGuild(command.message.guild.id);
+  const roleModel = getRoleModelClass(guild.id);
   isEnabledGuild(guild);
   isOnWatchChannel(guild, command.message.channel.id);
+  isLimitReached(guild);
 
   // ロール取り消し処理
   if (!command.args[1]) {
@@ -167,13 +178,6 @@ export async function removeRole(command: CommandArgObj): Promise<string> {
     return 'お前は誰だ';
   }
   await member.roles.remove(role.id);
+  await guildModelClass.updateGuildLastRequestedAt(guild.id);
   return `ロールを削除: ${role.name}`;
-}
-
-// 使用されていないロールの自動削除機能
-export function autoRemoveUnusedRoles(): Promise<string> {
-  return new Promise((resolve) => {
-    // 使用されていないロールの自動削除処理
-    resolve('Unused roles removed');
-  });
 }

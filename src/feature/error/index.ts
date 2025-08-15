@@ -8,14 +8,17 @@ import { ValidationError } from '@/utils/validator';
 import { Message } from 'discord.js';
 
 export function handleError(error: Error, message: Message) {
+  console.error('Error occurred:', error);
   if (error instanceof IgnorableError) {
     return;
   }
   if (error instanceof ValidationError) {
     message.reply(`入力内容がおかしい。 ${error.message}`);
+    return;
   }
   if (error instanceof StatusError) {
     message.reply(`答える必要はない`);
+    return;
   }
   if (error instanceof TooBusyError) {
     message.reply('今忙しい');
@@ -25,5 +28,6 @@ export function handleError(error: Error, message: Message) {
     message.reply('その資格はない');
     return;
   }
+  // 指定されたチャンネル内でエラー
   message.reply('何が言いたいのかわからん');
 }
