@@ -1,41 +1,47 @@
-import { isAuthorAdmin, PermissionError } from '@/helpers/permission';
-import { createGuild, listGuilds, updateGuildIsEnable } from '@/models/guilds';
-import { Client, Message } from 'discord.js';
+import { CommandArgObj, isLimitReached } from '@/helpers/command';
+import { isAuthorAdmin, isOnWatchChannel } from '@/helpers/permission';
+import { guildModelClass } from '@/models';
+
+import { Client } from 'discord.js';
 
 // Bot の応答チャンネル指定機能
-export async function setupBot(message: Message): Promise<string> {
-  const guild = message.guild;
-  const channel = message.channel;
-  if (!isAuthorAdmin(message)) {
-    throw new PermissionError();
-  }
-  await createGuild(guild, channel.id);
+export async function setupBot(command: CommandArgObj): Promise<string> {
+  isAuthorAdmin(command.message);
+
+  const guild = command.message.guild;
+  const channel = command.message.channel;
+  await guildModelClass.createGuild(guild, channel.id);
   return 'ここをキャンプ地とする';
 }
 
 // Bot 機能の有効化、無効化機能
-export async function startWatching(message: Message): Promise<string> {
-  await updateGuildIsEnable(message.guild.id, true);
+export async function startWatching(command: CommandArgObj): Promise<string> {
+  const guild = await guildModelClass.getGuild(command.message.guild.id);
+  isOnWatchChannel(guild, command.message.channel.id);
+  isLimitReached(guild);
+  await guildModelClass.updateGuildIsEnable(command.message.guild.id, true);
   return '応答機能を有効化';
 }
-export async function stopWatching(message: Message): Promise<string> {
-  await updateGuildIsEnable(message.guild.id, false);
+export async function stopWatching(command: CommandArgObj): Promise<string> {
+  const guild = await guildModelClass.getGuild(command.message.guild.id);
+  isOnWatchChannel(guild, command.message.channel.id);
+  isLimitReached(guild);
+  await guildModelClass.updateGuildIsEnable(command.message.guild.id, false);
   return '応答機能を無効化';
 }
 
 // Bot の死活確認用応答機能
-export function sendStatus(): Promise<string> {
-  return new Promise((resolve) => {
-    // Bot の死活確認用応答処理
-    resolve('ポリポリ');
-  });
+export async function sendStatus(command: CommandArgObj): Promise<string> {
+  const guild = await guildModelClass.getGuild(command.message.guild.id);
+  isOnWatchChannel(guild, command.message.channel.id);
+  return 'ポリポリ';
 }
 
 // Bot 起動時の通知機能
 export async function notifyBotReady(
   client: Client
 ): Promise<PromiseSettledResult<void>[]> {
-  const guilds = await listGuilds();
+  const guilds = await guildModelClass.listGuilds();
   const notifyTasks = guilds.map(async (guild) => {
     if (!guild.isEnabled) {
       return;

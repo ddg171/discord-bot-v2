@@ -1,19 +1,23 @@
 // Require the necessary discord.js classes
 import { Client, Events, GatewayIntentBits, Message } from 'discord.js';
 import { config } from 'dotenv';
+import { handleError } from './feature/error';
 import { notifyBotReady } from './feature/status';
-import { isBotMentioned, parseCommand, TooBusyError } from './helpers/command';
-import { PermissionError } from './helpers/permission';
-import { routes } from './routes';
+import { isBotMentioned, parseMessage } from './helpers/command';
+import { IgnorableError } from './helpers/permission';
+import { handleRoute, routes } from './routes';
 import { isValidCommand, showErrorInfo, showMessageInfo } from './utils';
-const { Guilds, GuildMessages, MessageContent } = GatewayIntentBits;
+const { Guilds, GuildMessages, MessageContent, GuildMembers } =
+  GatewayIntentBits;
 config();
 
 const token = process.env.DISCORD_TOKEN;
 const isDebug = process.env.DEBUG === 'true';
 
 // Create a new client instance
-const client = new Client({ intents: [Guilds, GuildMessages, MessageContent] });
+const client = new Client({
+  intents: [Guilds, GuildMessages, MessageContent, GuildMembers],
+});
 
 async function handleMessage(message: Message) {
   // botは無視
@@ -33,25 +37,20 @@ async function handleMessage(message: Message) {
       return;
     }
 
-    const commandObj = parseCommand(message);
-    if (!isValidCommand(routes, commandObj.command)) {
+    const commandArgs = { ...parseMessage(message), client };
+    if (!isValidCommand(routes, commandArgs.command)) {
       throw new Error('Invalid command');
     }
-    const resultMessage = await routes[commandObj.command](message);
+    const resultMessage = await handleRoute(commandArgs)(commandArgs);
     message.reply(resultMessage);
   } catch (error) {
     if (isDebug) {
       showErrorInfo(error);
+      if (error instanceof IgnorableError) {
+        console.warn(`Ignorable error: ${error.message}`);
+      }
     }
-    if (error instanceof TooBusyError) {
-      message.reply('今忙しい');
-      return;
-    }
-    if (error instanceof PermissionError) {
-      message.reply('その資格はない');
-      return;
-    }
-    message.reply('何が言いたいのかわからん');
+    handleError(error, message);
   }
 }
 

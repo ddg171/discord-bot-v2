@@ -1,5 +1,7 @@
 import { Firestore } from '@google-cloud/firestore';
 import * as path from 'path';
+import GuildModelClass from './guilds';
+import RoleModelClass from './roles';
 
 // このファイルの場所
 const __dirname = path.resolve();
@@ -15,3 +17,8 @@ firestore.settings({
 });
 
 export default firestore;
+
+export const guildModelClass = new GuildModelClass(firestore);
+
+export const getRoleModelClass = (guildId: string) =>
+  new RoleModelClass(firestore, guildId);
