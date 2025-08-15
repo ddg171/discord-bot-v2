@@ -20,10 +20,14 @@ export async function setupBot(command: CommandArgObj): Promise<string> {
 
 // Bot 機能の有効化、無効化機能
 export async function startWatching(command: CommandArgObj): Promise<string> {
+  const guild = await getGuild(command.message.guild.id);
+  isOnWatchChannel(guild, command.message.channel.id);
   await updateGuildIsEnable(command.message.guild.id, true);
   return '応答機能を有効化';
 }
 export async function stopWatching(command: CommandArgObj): Promise<string> {
+  const guild = await getGuild(command.message.guild.id);
+  isOnWatchChannel(guild, command.message.channel.id);
   await updateGuildIsEnable(command.message.guild.id, false);
   return '応答機能を無効化';
 }

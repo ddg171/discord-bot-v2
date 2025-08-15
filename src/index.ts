@@ -36,7 +36,7 @@ async function handleMessage(message: Message) {
 
     const commandArgs = { ...parseMessage(message), client };
     if (!isValidCommand(routes, commandArgs.command)) {
-      throw new Error('Invalid command');
+      throw new IgnorableError('Invalid command');
     }
     const resultMessage = await handleRoute(commandArgs)(commandArgs);
     message.reply(resultMessage);

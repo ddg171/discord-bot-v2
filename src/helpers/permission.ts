@@ -48,6 +48,6 @@ export function isOnWatchChannel(guild: GuildModel, channelId: string) {
   }
   console.log(guild.watchChannelId);
   if (guild.watchChannelId !== channelId) {
-    throw new IgnorableError('This channel is not allowed to create roles');
+    throw new IgnorableError('This channel is not assigned to response');
   }
 }
