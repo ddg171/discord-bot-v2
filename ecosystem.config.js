@@ -21,9 +21,9 @@ module.exports = {
         NODE_ENV: 'development',
         watch: true
       },
-      error_file: './logs/err.log',
-      out_file: './logs/out.log',
-      log_file: './logs/combined.log',
+      error_file: path.join(projectRoot, 'logs', 'error.log'),
+      out_file: path.join(projectRoot, 'logs', 'out.log'),
+      log_file: path.join(projectRoot, 'logs', 'combined.log'),
       time: true
     }
   ]
