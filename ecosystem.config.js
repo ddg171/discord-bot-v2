@@ -1,10 +1,15 @@
+const path = require('path');
+
+// プロジェクトルート
+const projectRoot = path.resolve(__dirname);
+
 module.exports = {
   apps: [
     {
       name: 'discord-bot-v2',
       script: 'npx',
       args: 'tsx src/index.ts',
-      cwd: '/home/ddg171/projects/discor-bot-v2',
+      cwd: projectRoot,
       instances: 1,
       autorestart: true,
       watch: false,
