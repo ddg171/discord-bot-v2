@@ -7,7 +7,7 @@ import {
 } from '../../helpers/permission';
 import { ValidationError } from '../../utils/validator';
 
-export function handleError(error: Error, message: Message) {
+export function handleError(error: unknown, message: Message) {
   console.error('Error occurred:', error);
   if (error instanceof IgnorableError) {
     return;
