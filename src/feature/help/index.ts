@@ -1,5 +1,9 @@
 export function showHelp() {
   const messages = [
+    '## Help',
+    'Application name: pot君(2型)',
+    'Developed by: hata_kaze',
+    '',
     '## コマンド一覧',
     '',
     '### 🔧 基本設定',
@@ -15,8 +19,8 @@ export function showHelp() {
     '`role delete <ロール名>` - 指定したロールを削除',
     '`role list` - 作成済みロールの一覧を表示',
     '`role user <ロール名>` - 指定したロールを持つユーザー一覧を表示',
-    '`role add <ロール名> <@ユーザー>` - ユーザーにロールを付与',
-    '`role remove <ロール名> <@ユーザー>` - ユーザーからロールを削除',
+    '`role add <ロール名>` - メンションを送信したユーザーにロールを付与',
+    '`role remove <ロール名>` - メンションを送信したユーザーからロールを取り消し',
     '',
     '### ℹ️ ヘルプ',
     '`help` - このヘルプメッセージを表示',
