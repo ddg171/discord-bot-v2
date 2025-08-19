@@ -15,7 +15,7 @@ export function isValidRoleName(roleName: string) {
   if (roleName.length > 10) {
     throw new ValidationError('長すぎ');
   }
-  if (!/^[\w-]+$/.test(roleName)) {
+  if (/[@#:```\n\r\t<>&"'\\]/.test(roleName)) {
     throw new ValidationError('その文字は無理');
   }
 }
