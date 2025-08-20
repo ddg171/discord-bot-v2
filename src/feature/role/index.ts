@@ -82,7 +82,7 @@ export async function deleteRole(command: CommandArgObj): Promise<string> {
 export async function listRoles(command: CommandArgObj): Promise<string> {
   const guild = await guildModelClass.getGuild(command.message.guild.id);
   const roleModel = getRoleModelClass(guild.id);
-  isAuthorAdmin(command.message);
+
   isEnabledGuild(guild);
   isOnWatchChannel(guild, command.message.channel.id);
   isLimitReached(guild);
