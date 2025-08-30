@@ -1,10 +1,12 @@
+const path = require('path');
+
 module.exports = {
   apps: [
     {
       name: 'discord-bot-v2',
       script: 'npx',
-      args: 'tsx src/index.ts',
-      cwd: '/home/ddg171/projects/discor-bot-v2',
+      args: path.resolve(__dirname, 'node_modules', '.bin', 'tsx') + ' ' + path.resolve(__dirname, 'src', 'index.ts'),
+      cwd: path.resolve(__dirname),
       instances: 1,
       autorestart: true,
       watch: false,
@@ -16,9 +18,9 @@ module.exports = {
         NODE_ENV: 'development',
         watch: true
       },
-      error_file: './logs/err.log',
-      out_file: './logs/out.log',
-      log_file: './logs/combined.log',
+      error_file: path.resolve(__dirname, 'logs', 'err.log'),
+      out_file: path.resolve(__dirname, 'logs', 'out.log'),
+      log_file: path.resolve(__dirname, 'logs', 'combined.log'),
       time: true
     }
   ]
