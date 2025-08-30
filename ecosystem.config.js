@@ -8,7 +8,7 @@ module.exports = {
       args: path.resolve(__dirname, 'node_modules', '.bin', 'tsx') + ' ' + path.resolve(__dirname, 'src', 'index.ts'),
       cwd: path.resolve(__dirname),
       instances: 1,
-      autorestart: true,
+      autorestart: false,
       watch: false,
       max_memory_restart: '1G',
       env: {
